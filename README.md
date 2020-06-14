@@ -1,1 +1,0 @@
-# VenomBot, a C# / [Discord.Net](https://github.com/discord-net/Discord.Net) Bot
