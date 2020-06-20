@@ -12,39 +12,72 @@ using Microsoft.Extensions.Configuration;
 using System.Dynamic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
+using Microsoft.EntityFrameworkCore;
 
 namespace VenomBot.Modules
 {
     // for commands to be available, and have the Context passed to them, we must inherit ModuleBase
     public class Commands : ModuleBase<SocketCommandContext>
     {
+
+        private static readonly Color Purplism = new Color(38, 0, 99);
+
+        [Command("shutdown")]
+        [RequireOwner]
+
+        public async Task Shutdown()
+        {
+            Console.WriteLine($"{Context.Message.Author} shut VenomBot down.");
+            EmbedBuilder builder = new EmbedBuilder();
+
+            builder.WithTitle("Shutting Down.");
+            builder.WithColor(Color.DarkPurple);
+
+            await ReplyAsync("", false, builder.Build());
+            await Task.Delay(1000);
+            Environment.Exit(0);
+        }
+
         [Command("ping")]
 
         public async Task Ping()
         {
+
             EmbedBuilder ping = new EmbedBuilder();
 
             ping.WithTitle("Pong :ping_pong:");
             ping.WithDescription($"{Context.Client.Latency}ms!");
-            ping.WithColor(Color.DarkBlue);
+            ping.WithColor(Purplism);
             ping.WithCurrentTimestamp();
             await ReplyAsync("", false, ping.Build());
         }
 
-        [Command("help")]
-        public async Task HelpCommand()
+        [Command("guilds")]
+        [Summary("Lists all of the guilds the bot is in.")]
+
+        public async Task Network()
         {
+
             EmbedBuilder builder = new EmbedBuilder();
 
-            builder.WithTitle("Help");
-            builder.AddField("Ping", "Use this command to test if the bot is online!");    // true - for inline
-            builder.AddField($"Rice", "ricey dicey.");
-            builder.AddField("Bork", "Bork at your friends : O");
-            builder.WithThumbnailUrl("https://www.dropbox.com/s/e1aau7lsfv3bvuo/Circle-Transparent.png?dl=1");
+            var table = new Table("Name", "Owner", "Users");
+            foreach (var guild in Context.Client.Guilds)
+            {
+                table.AddRow(guild.Name, guild.Owner.Username, guild.Users.Count().ToString());
 
-            builder.WithColor(Color.DarkPurple);
+                var channel = guild.DefaultChannel ?? guild.TextChannels.FirstOrDefault();
+                if (channel != null)
+                {
+
+                }
+            }
+
+            builder.WithTitle("Guilds");
+            builder.WithDescription(table.ToString());
+
             await ReplyAsync("", false, builder.Build());
         }
+
 
         [Command("8ball")]
         [Alias("ask")]

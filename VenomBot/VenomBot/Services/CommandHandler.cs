@@ -12,6 +12,7 @@ namespace VenomBot.Services
 {
     public class CommandHandler
     {
+
         // setup fields to be set later in the constructor
         private readonly IConfiguration _config;
         private readonly CommandService _commands;
@@ -19,8 +20,6 @@ namespace VenomBot.Services
         private readonly IServiceProvider _services;
 
         // public fields
-
-        public string commandHelp { get; set; }
 
         public CommandHandler(IServiceProvider services)
         {
@@ -104,5 +103,8 @@ namespace VenomBot.Services
             builder.WithColor(Color.Red);
             await context.Channel.SendMessageAsync("", false, builder.Build());
         }
+
+
+
     }
 }

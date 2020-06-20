@@ -18,22 +18,44 @@ using System.Runtime.InteropServices.ComTypes;
 namespace VenomBot.Modules
 {
     // for commands to be available, and have the Context passed to them, we must inherit ModuleBase
-    public class AdminModule : ModuleBase
+    public class Admin : ModuleBase
     {
 
-        [Name("Moderator")]
-        [RequireContext(ContextType.Guild)]
-
-        [Command("purge")]
+        [Command("Purge")]
+        [Summary("Removes the specified number of messages.")]
         [RequireBotPermission(GuildPermission.ManageMessages)]
         [RequireUserPermission(GuildPermission.ManageMessages)]
 
-        public async Task Purge(int amount)
+        public async Task Purge(int amount = 0)
         {
+
+            if(amount == 0)
+            {
+                EmbedBuilder noargs = new EmbedBuilder();
+
+                noargs.WithTitle("Please provide the number of messages to delete!");
+                noargs.WithDescription("No message deletion amount provided.");
+                noargs.WithCurrentTimestamp();
+                noargs.WithFooter($"{Context.Message.Author.ToString()}");
+                noargs.WithColor(Color.DarkPurple);
+
+                await ReplyAsync("", false, noargs.Build());
+                return;
+            }
+
             // Check if the amount provided by the user is positive.
             if (amount <= 0)
             {
-                await ReplyAsync("The amount of messages to remove must be positive.");
+
+                EmbedBuilder belowzero = new EmbedBuilder();
+
+                belowzero.WithTitle("The amount of messages to delete must be positive!");
+                belowzero.WithDescription("Message deletion amount was a negative number.");
+                belowzero.WithCurrentTimestamp();
+                belowzero.WithFooter($"{Context.Message.Author.ToString()}");
+                belowzero.WithColor(Color.DarkPurple);
+
+                await ReplyAsync("", false, belowzero.Build());
                 return;
             }
 
@@ -63,6 +85,7 @@ namespace VenomBot.Modules
 
                 builder.WithColor(Color.Red);
                 await ReplyAsync("", false, builder.Build());
+                await Context.Message.DeleteAsync();
             }
         }
 
