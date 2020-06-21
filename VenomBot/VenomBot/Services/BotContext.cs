@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
+
+
 namespace VenomBot.Services
 {
     public class BotContext : DbContext
@@ -28,6 +30,11 @@ namespace VenomBot.Services
                     .WithMany(e => e.MemberStats)
                     .HasForeignKey(e => e.UserId);
             });
+
+
+
         }
     }
+
+    
 }

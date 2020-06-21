@@ -6,20 +6,119 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.Extensions.Configuration;
-using System.Threading.Channels;
-using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using System.Net.NetworkInformation;
-using System.Security.Cryptography.X509Certificates;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace VenomBot.Modules
 {
     // for commands to be available, and have the Context passed to them, we must inherit ModuleBase
-    public class Admin : ModuleBase
+    public class Admin : ModuleBase<SocketCommandContext>
     {
+
+        [Command("slowmode")]
+        [RequireUserPermission(GuildPermission.KickMembers)]
+
+        public async Task Slowmode(string value = null)
+        {
+
+            if (value == null)
+            {
+                EmbedBuilder novalue = new EmbedBuilder();
+
+                novalue.WithTitle("Please provide a slowmode timer in seconds!");
+                novalue.WithDescription("A value is needed in order to set the channel slowmode.");
+                novalue.WithCurrentTimestamp();
+                novalue.WithFooter($"{Context.Message.Author.ToString()}");
+                novalue.WithColor(Color.DarkPurple);
+
+                await ReplyAsync("", false, novalue.Build());
+
+                return;
+            }
+
+            int val = 0;
+            val = Convert.ToInt32(value);
+            var chan = Context.Guild.GetTextChannel(Context.Channel.Id);
+            await chan.ModifyAsync(x =>
+            {
+                x.SlowModeInterval = val;
+            });
+
+            EmbedBuilder builder = new EmbedBuilder();
+
+            builder.WithTitle($"Slowmode set to {value}s");
+            builder.WithDescription($"Successfully set slowmode to {value}s");
+            builder.WithCurrentTimestamp();
+            builder.WithFooter($"{Context.Message.Author.ToString()}");
+            builder.WithColor(Color.DarkPurple);
+
+            await ReplyAsync("", false, builder.Build());
+        }
+
+        [Command("mute")]
+        [RequireUserPermission(GuildPermission.MuteMembers)]
+
+        public async Task Mute(SocketGuildUser user = null)
+        {
+
+            if (user == null)
+            {
+                EmbedBuilder nouser = new EmbedBuilder();
+
+                nouser.WithTitle("Please mention a user!");
+                nouser.WithDescription("I don't know who to mute!");
+                nouser.WithFooter($"{Context.Message.Author.ToString()}");
+                nouser.WithCurrentTimestamp();
+                nouser.WithColor(Color.DarkPurple);
+                await ReplyAsync("", false, nouser.Build());
+                return;
+            }
+
+            var muteRole = Context.Guild.Roles.SingleOrDefault(x => x.Name.Equals("Muted", StringComparison.OrdinalIgnoreCase) && !x.Permissions.SendMessages);
+            if (muteRole == null)
+            {
+                EmbedBuilder nomuterole = new EmbedBuilder();
+
+                nomuterole.WithTitle("No mute role found.");
+                nomuterole.WithDescription("Please create a role named `Muted` without SendMessages permission.");
+                nomuterole.WithCurrentTimestamp();
+                nomuterole.WithColor(Color.DarkPurple);
+                nomuterole.WithFooter($"{Context.Message.Author.ToString()}");
+
+                await ReplyAsync("", false, nomuterole.Build());
+                return;
+            }
+            if (user.Roles.Any(x => x.Name.Equals("Muted", StringComparison.OrdinalIgnoreCase)))
+            {
+                await user.RemoveRoleAsync(muteRole);
+
+                EmbedBuilder unmuted = new EmbedBuilder();
+
+                unmuted.WithTitle($"Unmuted {user.ToString()}");
+                unmuted.WithDescription($"Successfully unmuted.");
+                unmuted.WithCurrentTimestamp();
+                unmuted.WithFooter($"{Context.Message.Author.ToString()}");
+                unmuted.WithColor(Color.DarkBlue);
+
+                await ReplyAsync("", false, unmuted.Build());
+
+                return;
+            }
+            else
+            {
+                await user.AddRoleAsync(muteRole);
+
+                EmbedBuilder muted = new EmbedBuilder();
+
+                muted.WithTitle($"Muted {user.ToString()}");
+                muted.WithDescription("Successfully muted.");
+                muted.WithCurrentTimestamp();
+                muted.WithColor(Color.DarkerGrey);
+                muted.WithFooter($"{Context.Message.Author.ToString()}");
+
+                await ReplyAsync("", false, muted.Build());
+            }
+        }
+
+
 
         [Command("Purge")]
         [Summary("Removes the specified number of messages.")]

@@ -46,6 +46,9 @@ namespace VenomBot.Services
         // this class is where the magic starts, and takes actions upon receiving messages
         public async Task MessageReceivedAsync(SocketMessage rawMessage)
         {
+            // get prefix from the configuration file
+            char prefix = Char.Parse(_config["Prefix"]);
+
             // ensures we don't process system/other bot messages
             if (!(rawMessage is SocketUserMessage message))
             {
@@ -59,9 +62,6 @@ namespace VenomBot.Services
 
             // sets the argument position away from the prefix we set
             var argPos = 0;
-
-            // get prefix from the configuration file
-            char prefix = Char.Parse(_config["Prefix"]);
 
             // determine if the message has a valid prefix, and adjust argPos based on prefix
             if (!(message.HasMentionPrefix(_client.CurrentUser, ref argPos) || message.HasCharPrefix(prefix, ref argPos)))
