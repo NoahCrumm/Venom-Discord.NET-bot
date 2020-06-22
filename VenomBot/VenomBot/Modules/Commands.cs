@@ -24,23 +24,6 @@ namespace VenomBot.Modules
 
         private static readonly Color Purplism = new Color(38, 0, 99);
 
-
-        [Command("shutdown")]
-        [RequireOwner]
-
-        public async Task Shutdown()
-        {
-            Console.WriteLine($"{Context.Message.Author} shut VenomBot down.");
-            EmbedBuilder builder = new EmbedBuilder();
-
-            builder.WithTitle("Shutting Down.");
-            builder.WithColor(Color.DarkPurple);
-
-            await ReplyAsync("", false, builder.Build());
-            await Task.Delay(1000);
-            Environment.Exit(0);
-        }
-
         [Command("ping")]
 
         public async Task Ping()

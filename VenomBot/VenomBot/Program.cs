@@ -53,7 +53,7 @@ namespace VenomBot
                 await client.StartAsync();
 
                 //Set the game name and 
-                string gameName = "Dev Version";
+                string gameName = "Version 1.1.0 <3";
                 await _client.SetGameAsync(gameName);
                 await _client.SetStatusAsync(UserStatus.DoNotDisturb);
 
