@@ -1,24 +1,13 @@
 ﻿using Discord;
-using Discord.Net;
-using Discord.WebSocket;
 using Discord.Commands;
 using System;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using VenomBot.Services;
-using Microsoft.Extensions.Configuration;
-using System.Dynamic;
-using System.ComponentModel;
-using System.ComponentModel.Design;
-using Microsoft.EntityFrameworkCore;
-using System.Runtime.InteropServices.ComTypes;
-using System.Transactions;
 using System.Text.RegularExpressions;
 
 namespace VenomBot.Modules
