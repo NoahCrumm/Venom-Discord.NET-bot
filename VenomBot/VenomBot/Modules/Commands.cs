@@ -4,6 +4,10 @@ using Discord.WebSocket;
 using Discord.Commands;
 using System;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using Newtonsoft.Json;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -15,6 +19,7 @@ using System.ComponentModel.Design;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.InteropServices.ComTypes;
 using System.Transactions;
+using System.Text.RegularExpressions;
 
 namespace VenomBot.Modules
 {
@@ -23,6 +28,42 @@ namespace VenomBot.Modules
     {
 
         private static readonly Color Purplism = new Color(38, 0, 99);
+
+
+        static int rot = 0;
+        [Command("CursedImage")]
+        [RequireNsfw]
+
+        public async Task imagesearch()
+        {
+            HttpClient c = new HttpClient();
+            var req = await c.GetAsync("https://www.reddit.com/r/cursedimages.json");
+            string resp = await req.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<RedditHandler>(resp);
+            Regex r = new Regex(@"https:\/\/i.redd.it\/(.*?)\.");
+            var childs = data.Data.Children.Where(x => r.IsMatch(x.Data.Url.ToString()));
+            Random rnd = new Random();
+            int count = childs.Count();
+            if (rot >= count - 1)
+                rot = 0;
+            var post = childs.ToArray()[rot];
+            rot++;
+
+            EmbedBuilder b = new EmbedBuilder()
+            {
+                Title = "Cursed",
+                ImageUrl = post.Data.Url.ToString(),
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = "u/" + post.Data.Author
+                }
+            };
+
+            b.WithCurrentTimestamp();
+            b.WithColor(Color.DarkPurple);
+
+            await Context.Channel.SendMessageAsync("", false, b.Build());
+        }
 
         [Command("ping")]
 
