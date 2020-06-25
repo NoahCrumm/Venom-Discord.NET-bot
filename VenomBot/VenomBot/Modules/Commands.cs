@@ -237,10 +237,25 @@ namespace VenomBot.Modules
 
 
         [Command("bork")]
-        public async Task BorkCommand([Remainder] IUser user)
+        public async Task BorkCommand([Remainder] IUser user = null)
         {
+
+            if (user == null)
+            {
+                EmbedBuilder builder2 = new EmbedBuilder();
+
+                builder2.WithTitle($"{Context.Message.Author.ToString()} borked.");
+                builder2.WithImageUrl("https://moderndogmagazine.com/sites/default/files/images/articles/top_images/barkingdogs.JPG");
+                builder2.WithCurrentTimestamp();
+
+                builder2.WithColor(Color.DarkBlue);
+                await ReplyAsync("", false, builder2.Build());
+                return;
+            }
+
             EmbedBuilder builder = new EmbedBuilder();
 
+            builder.WithTitle($"{Context.Message.Author.ToString()} borked at {user.ToString()}.");
             builder.WithImageUrl("https://moderndogmagazine.com/sites/default/files/images/articles/top_images/barkingdogs.JPG");
             builder.WithCurrentTimestamp();
 
