@@ -116,7 +116,6 @@ namespace VenomBot.Modules
                 muted.WithFooter($"{Context.Message.Author.ToString()}");
 
                 await ReplyAsync("", false, muted.Build());
-                await AddModlogs(userAccount.Id, Action.Muted, Context.Message.Author.Id, reason, userAccount.Username);
             }
         }
 
