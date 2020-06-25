@@ -116,6 +116,7 @@ namespace VenomBot.Modules
                 muted.WithFooter($"{Context.Message.Author.ToString()}");
 
                 await ReplyAsync("", false, muted.Build());
+                await AddModlogs(userAccount.Id, Action.Muted, Context.Message.Author.Id, reason, userAccount.Username);
             }
         }
 
@@ -243,6 +244,7 @@ namespace VenomBot.Modules
             await user.SendMessageAsync($"{user.Mention}", false, builder2.Build());
             await ReplyAsync($"{user.Mention}");
             await Context.Guild.AddBanAsync(user, 7, reason);
+            await AddModlogs(userAccount.Id, Action.Banned, Context.Message.Author.Id, reason, userAccount.Username);
         }
 
 
@@ -299,6 +301,7 @@ namespace VenomBot.Modules
 
             await user.SendMessageAsync("", false, kicked2.Build());
             await user.KickAsync(reason);
+            await AddModlogs(userAccount.Id, Action.Kicked, Context.Message.Author.Id, reason, userAccount.Username);
         }
     }
     
