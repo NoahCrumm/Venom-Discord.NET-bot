@@ -59,63 +59,76 @@ namespace VenomBot.Modules
 
         public async Task Mute(SocketGuildUser user = null)
         {
-
-            if (user == null)
+            try
             {
-                EmbedBuilder nouser = new EmbedBuilder();
+                if (user == null)
+                {
+                    EmbedBuilder nouser = new EmbedBuilder();
 
-                nouser.WithTitle("Please mention a user!");
-                nouser.WithDescription("I don't know who to mute!");
-                nouser.WithFooter($"{Context.Message.Author.ToString()}");
-                nouser.WithCurrentTimestamp();
-                nouser.WithColor(Color.DarkPurple);
-                await ReplyAsync("", false, nouser.Build());
-                return;
+                    nouser.WithTitle("Please mention a user!");
+                    nouser.WithDescription("I don't know who to mute!");
+                    nouser.WithFooter($"{Context.Message.Author.ToString()}");
+                    nouser.WithCurrentTimestamp();
+                    nouser.WithColor(Color.DarkPurple);
+                    await ReplyAsync("", false, nouser.Build());
+                    return;
+                }
+
+                var muteRole = Context.Guild.Roles.SingleOrDefault(x => x.Name.Equals("Muted", StringComparison.OrdinalIgnoreCase) && !x.Permissions.SendMessages);
+                if (muteRole == null)
+                {
+                    EmbedBuilder nomuterole = new EmbedBuilder();
+
+                    nomuterole.WithTitle("No mute role found.");
+                    nomuterole.WithDescription("Please create a role named `Muted` without SendMessages permission.");
+                    nomuterole.WithCurrentTimestamp();
+                    nomuterole.WithColor(Color.DarkPurple);
+                    nomuterole.WithFooter($"{Context.Message.Author.ToString()}");
+
+                    await ReplyAsync("", false, nomuterole.Build());
+                    return;
+                }
+                if (user.Roles.Any(x => x.Name.Equals("Muted", StringComparison.OrdinalIgnoreCase)))
+                {
+                    await user.RemoveRoleAsync(muteRole);
+
+                    EmbedBuilder unmuted = new EmbedBuilder();
+
+                    unmuted.WithTitle($"Unmuted {user.ToString()}");
+                    unmuted.WithDescription($"Successfully unmuted.");
+                    unmuted.WithCurrentTimestamp();
+                    unmuted.WithFooter($"{Context.Message.Author.ToString()}");
+                    unmuted.WithColor(Color.DarkBlue);
+
+                    await ReplyAsync("", false, unmuted.Build());
+
+                    return;
+                }
+                else
+                {
+                    await user.AddRoleAsync(muteRole);
+
+                    EmbedBuilder muted = new EmbedBuilder();
+
+                    muted.WithTitle($"Muted {user.ToString()}");
+                    muted.WithDescription("Successfully muted.");
+                    muted.WithCurrentTimestamp();
+                    muted.WithColor(Color.DarkerGrey);
+                    muted.WithFooter($"{Context.Message.Author.ToString()}");
+
+                    await ReplyAsync("", false, muted.Build());
+                }
             }
-
-            var muteRole = Context.Guild.Roles.SingleOrDefault(x => x.Name.Equals("Muted", StringComparison.OrdinalIgnoreCase) && !x.Permissions.SendMessages);
-            if (muteRole == null)
+            catch (Exception)
             {
-                EmbedBuilder nomuterole = new EmbedBuilder();
+                EmbedBuilder builder = new EmbedBuilder();
 
-                nomuterole.WithTitle("No mute role found.");
-                nomuterole.WithDescription("Please create a role named `Muted` without SendMessages permission.");
-                nomuterole.WithCurrentTimestamp();
-                nomuterole.WithColor(Color.DarkPurple);
-                nomuterole.WithFooter($"{Context.Message.Author.ToString()}");
+                builder.WithTitle("Mute role must not be above the bot role.");
+                builder.WithCurrentTimestamp();
+                builder.WithColor(Color.DarkPurple);
+                builder.WithFooter($"{Context.Message.Author.ToString()}");
 
-                await ReplyAsync("", false, nomuterole.Build());
-                return;
-            }
-            if (user.Roles.Any(x => x.Name.Equals("Muted", StringComparison.OrdinalIgnoreCase)))
-            {
-                await user.RemoveRoleAsync(muteRole);
-
-                EmbedBuilder unmuted = new EmbedBuilder();
-
-                unmuted.WithTitle($"Unmuted {user.ToString()}");
-                unmuted.WithDescription($"Successfully unmuted.");
-                unmuted.WithCurrentTimestamp();
-                unmuted.WithFooter($"{Context.Message.Author.ToString()}");
-                unmuted.WithColor(Color.DarkBlue);
-
-                await ReplyAsync("", false, unmuted.Build());
-
-                return;
-            }
-            else
-            {
-                await user.AddRoleAsync(muteRole);
-
-                EmbedBuilder muted = new EmbedBuilder();
-
-                muted.WithTitle($"Muted {user.ToString()}");
-                muted.WithDescription("Successfully muted.");
-                muted.WithCurrentTimestamp();
-                muted.WithColor(Color.DarkerGrey);
-                muted.WithFooter($"{Context.Message.Author.ToString()}");
-
-                await ReplyAsync("", false, muted.Build());
+                await ReplyAsync($"{Context.Message.Author.Mention}", false, builder.Build());
             }
         }
 

@@ -20,6 +20,23 @@ namespace VenomBot.Modules
 
 
         static int rot = 0;
+
+        [Command("lovetest")]
+
+        public async Task RNG([Remainder] string love)
+        {
+
+            var rand = new Random();
+
+            EmbedBuilder builder = new EmbedBuilder();
+
+            builder.WithTitle("Love Test");
+            builder.WithDescription($"How much does {Context.Message.Author.ToString()} love {love.ToString()}");
+            builder.AddField(rand.Next(101).ToString(), "%");
+
+            await ReplyAsync("", false, builder.Build());
+        }
+        
         [Command("CursedImage")]
         [RequireNsfw]
 
