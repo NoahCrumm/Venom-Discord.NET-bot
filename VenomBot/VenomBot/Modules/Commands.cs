@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using VenomBot.Services;
 using System.Text.RegularExpressions;
+using Discord.WebSocket;
 
 namespace VenomBot.Modules
 {
@@ -36,7 +37,7 @@ namespace VenomBot.Modules
 
             await ReplyAsync("", false, builder.Build());
         }
-        
+
         [Command("CursedImage")]
         [RequireNsfw]
 

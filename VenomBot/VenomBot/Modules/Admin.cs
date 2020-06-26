@@ -4,8 +4,10 @@ using Discord.Net;
 using Discord.WebSocket;
 using Discord.Commands;
 using System;
+using System.IO;
 using System.Linq;
-using System.Text;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace VenomBot.Modules
@@ -13,6 +15,284 @@ namespace VenomBot.Modules
     // for commands to be available, and have the Context passed to them, we must inherit ModuleBase
     public class Admin : ModuleBase<SocketCommandContext>
     {
+        static string ModLogsPath = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Modlogs.json";
+        static async Task AddModlogs(ulong userID, Action action, ulong ModeratorID, string reason, string username)
+        {
+            if (currentLogs.Users.Any(x => x.userId == userID))
+            {
+                currentLogs.Users[currentLogs.Users.FindIndex(x => x.userId == userID)].Logs.Add(new UserModLogs()
+                {
+                    Action = action,
+                    ModeratorID = ModeratorID,
+                    Reason = reason,
+                    Date = DateTime.UtcNow.ToString("r")
+                });
+            }
+            else
+            {
+                currentLogs.Users.Add(new User()
+                {
+                    Logs = new List<UserModLogs>()
+                    {
+                        { new UserModLogs(){
+                            Action = action,
+                            ModeratorID = ModeratorID,
+                            Reason = reason,
+                            Date = DateTime.UtcNow.ToString("r")
+                        } }
+                    },
+                    userId = userID,
+                    username = username
+                });
+            }
+            SaveModLogs();
+        }
+
+        static ModlogsJson LoadModLogs()
+        {
+            try
+            {
+                var d = JsonConvert.DeserializeObject<ModlogsJson>(File.ReadAllText(ModLogsPath));
+                if (d == null) { throw new Exception(); }
+                return d;
+            }
+            catch //(Exception ex)
+            {
+                return new ModlogsJson() { Users = new List<User>() };
+            }
+
+
+        }
+
+        public static ModlogsJson currentLogs { get; set; } = LoadModLogs();
+        static public void SaveModLogs()
+        {
+            string json = JsonConvert.SerializeObject(currentLogs);
+            File.WriteAllText(ModLogsPath, json);
+        }
+
+        public class ModlogsJson
+        {
+            public List<User> Users { get; set; }
+        }
+        public class User
+        {
+            public List<UserModLogs> Logs { get; set; }
+            public ulong userId { get; set; }
+            public string username { get; set; }
+        }
+        public class UserModLogs
+        {
+            public string Reason { get; set; }
+            public Action Action { get; set; }
+            public ulong ModeratorID { get; set; }
+            public string Date { get; set; }
+        }
+
+        public enum Action
+        {
+            Warned,
+            Kicked,
+            Banned,
+            Muted,
+            voiceban
+        }
+
+        [Command("clearlog")]
+        public async Task clearwarn(string user1, int number = 999)
+        {
+            var user = Context.User as SocketGuildUser;
+            var roleStaff = (user as IGuildUser).Guild.Roles.FirstOrDefault(x => x.Name == "Staff");
+            var mentions = Context.Message.MentionedUsers;
+
+            if (!user.GuildPermissions.ManageMessages)
+            {
+                await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                {
+                    Title = "You do not have permission to execute this command",
+                    Description = "You do not have the valid permission to execute this command",
+                    Color = Color.Red
+                }.Build());
+                return;
+            }
+
+            Regex r = new Regex("(\\d{18}|\\d{17})");
+            if (!r.IsMatch(user1))
+            {
+                await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                {
+                    Title = "Invalid ID",
+                    Description = "The ID you provided is invalid!",
+                    Color = Color.Red
+                }.Build());
+                return;
+            }
+            ulong id;
+            try
+            {
+                id = Convert.ToUInt64(r.Match(user1).Groups[1].Value);
+            }
+            catch
+            {
+                await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                {
+                    Title = "Invalid ID",
+                    Description = "The ID you provided is invalid!",
+                    Color = Color.Red
+                }.Build());
+                return;
+            }
+
+            var num = number.ToString();
+
+            if (num == "999")
+            {
+                if (currentLogs.Users.Any(x => x.userId == id))
+                {
+                    var usrlogs = currentLogs.Users[currentLogs.Users.FindIndex(x => x.userId == id)];
+                    string usrnm = Context.Guild.GetUser(usrlogs.userId) == null ? usrlogs.username : Context.Guild.GetUser(usrlogs.userId).ToString();
+                    EmbedBuilder b = new EmbedBuilder()
+                    {
+                        Title = $"Modlogs for **{usrnm}**",
+                        Color = Color.DarkMagenta,
+                        Description = $"Modlogs for {usrlogs.username},\nTo remove a log type `!clearlog <user> <log number>`\n",
+                        Fields = new List<EmbedFieldBuilder>()
+                    };
+                    for (int i = 0; i != usrlogs.Logs.Count; i++)
+                    {
+                        var log = usrlogs.Logs[i];
+                        b.Fields.Add(new EmbedFieldBuilder()
+                        {
+                            IsInline = false,
+                            Name = (i + 1).ToString(),
+                            Value =
+                            $"**{log.Action}**\n" +
+                            $"Reason: {log.Reason}\n" +
+                            $"Moderator: <@{log.ModeratorID}> ({log.ModeratorID.ToString()}\n" +
+                            $"Date: {log.Date}"
+                        });
+                    }
+                    await Context.Channel.SendMessageAsync("", false, b.Build());
+                    return;
+                }
+                else
+                {
+                    EmbedBuilder b = new EmbedBuilder()
+                    {
+                        Title = "User has no logs!",
+                        Description = $"The user <@{id}> has no logs!",
+                        Color = Color.Red,
+                    };
+                    await Context.Channel.SendMessageAsync("", false, b.Build());
+                    return;
+                }
+            }
+
+            if (currentLogs.Users.Any(x => x.userId == id))
+            {
+                var usrlogs = currentLogs.Users[currentLogs.Users.FindIndex(x => x.userId == id)];
+                usrlogs.Logs.RemoveAt(number - 1);
+                string usrnm = Context.Guild.GetUser(usrlogs.userId) == null ? usrlogs.username : Context.Guild.GetUser(usrlogs.userId).ToString();
+                EmbedBuilder b = new EmbedBuilder()
+                {
+                    Title = $"Successfully cleared a log for **{usrnm}**",
+                    Color = Color.DarkMagenta,
+                    Description = $"Modlogs for {usrlogs.username},\nTo remove a log type `!clearlog <user> <log number>`\n",
+                    Fields = new List<EmbedFieldBuilder>()
+                };
+                for (int i = 0; i != usrlogs.Logs.Count; i++)
+                {
+                    var log = usrlogs.Logs[i];
+                    b.Fields.Add(new EmbedFieldBuilder()
+                    {
+                        IsInline = false,
+                        Name = (i + 1).ToString(),
+                        Value =
+                        $"**{log.Action}**\n" +
+                        $"Reason: {log.Reason}\n" +
+                        $"Moderator: <@{log.ModeratorID}> ({log.ModeratorID.ToString()}\n" +
+                        $"Date: {log.Date}"
+                    });
+                }
+                await Context.Channel.SendMessageAsync("", false, b.Build());
+            }
+            else
+            {
+                EmbedBuilder b = new EmbedBuilder()
+                {
+                    Title = "User has no logs!",
+                    Description = $"The user <@{id}> has no logs!",
+                    Color = Color.Red,
+                };
+                await Context.Channel.SendMessageAsync("", false, b.Build());
+            }
+
+        }
+
+        [Command("modlogs")]
+        public async Task Modlogs(string mention)
+        {
+            var user = Context.User as SocketGuildUser;
+            var roleStaff = (user as IGuildUser).Guild.Roles.FirstOrDefault(x => x.Name == "Staff");
+            var mentions = Context.Message.MentionedUsers;
+            if (!user.GuildPermissions.ManageMessages)
+            {
+                await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                {
+                    Title = "You do not have permission to execute this command",
+                    Description = "You do not have the valid permission to execute this command",
+                    Color = Color.Red
+                }.Build());
+                return;
+            }
+
+            if (mentions.Count == 0)
+            {
+                await Context.Channel.SendMessageAsync("test", false);
+                return;
+            }
+
+            var user1 = mentions.First();
+
+            if (currentLogs.Users.Any(x => x.userId == user1.Id))
+            {
+                var userAcount = currentLogs.Users[currentLogs.Users.FindIndex(x => x.userId == user1.Id)];
+                var logs = userAcount.Logs;
+                string usrnm = Context.Guild.GetUser(userAcount.userId) == null ? userAcount.username : Context.Guild.GetUser(userAcount.userId).ToString();
+                EmbedBuilder b = new EmbedBuilder()
+                {
+                    Title = $"Modlogs for **{usrnm}** ({user1.Id})",
+                    Description = $"To remove a log type `!clearlog <user> <log number>`",
+                    Color = Color.Green,
+                    Fields = new List<EmbedFieldBuilder>()
+                };
+                foreach (var log in logs)
+                {
+                    b.Fields.Add(new EmbedFieldBuilder()
+                    {
+                        IsInline = false,
+                        Name = Enum.GetName(typeof(Action), log.Action),
+                        Value = $"Reason: {log.Reason}\nModerator: <@{log.ModeratorID}>\nDate: {log.Date}"
+                    });
+                }
+                if (logs.Count == 0)
+                {
+                    b.Description = "This user has not logs!";
+                }
+                await Context.Channel.SendMessageAsync("", false, b.Build());
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("", false, new Discord.EmbedBuilder()
+                {
+                    Title = $"Modlogs for ({user1.Id})",
+                    Description = "This user has no logs! :D",
+                    Color = Color.Green
+                }.Build());
+                return;
+            }
+        }
+
 
         [Command("slowmode")]
         [RequireUserPermission(GuildPermission.KickMembers)]
@@ -57,7 +337,7 @@ namespace VenomBot.Modules
         [Command("mute")]
         [RequireUserPermission(GuildPermission.MuteMembers)]
 
-        public async Task Mute(SocketGuildUser user = null)
+        public async Task Mute(SocketGuildUser user = null, [Remainder] string reason = null)
         {
             try
             {
@@ -88,22 +368,6 @@ namespace VenomBot.Modules
                     await ReplyAsync("", false, nomuterole.Build());
                     return;
                 }
-                if (user.Roles.Any(x => x.Name.Equals("Muted", StringComparison.OrdinalIgnoreCase)))
-                {
-                    await user.RemoveRoleAsync(muteRole);
-
-                    EmbedBuilder unmuted = new EmbedBuilder();
-
-                    unmuted.WithTitle($"Unmuted {user.ToString()}");
-                    unmuted.WithDescription($"Successfully unmuted.");
-                    unmuted.WithCurrentTimestamp();
-                    unmuted.WithFooter($"{Context.Message.Author.ToString()}");
-                    unmuted.WithColor(Color.DarkBlue);
-
-                    await ReplyAsync("", false, unmuted.Build());
-
-                    return;
-                }
                 else
                 {
                     await user.AddRoleAsync(muteRole);
@@ -117,10 +381,15 @@ namespace VenomBot.Modules
                     muted.WithFooter($"{Context.Message.Author.ToString()}");
 
                     await ReplyAsync("", false, muted.Build());
+                    await AddModlogs(user.Id, Action.Muted, Context.Message.Author.Id, reason, user.Username);
+                    return;
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+
+                Console.WriteLine(e.Message);
+
                 EmbedBuilder builder = new EmbedBuilder();
 
                 builder.WithTitle("Mute role must not be above the bot role.");
