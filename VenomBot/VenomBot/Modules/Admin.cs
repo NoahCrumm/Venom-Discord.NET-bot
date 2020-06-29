@@ -1,6 +1,6 @@
 ﻿using Discord;
 using Newtonsoft.Json;
-using Discord.Net;
+using Discord.Addons.Interactive;
 using Discord.WebSocket;
 using Discord.Commands;
 using System;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace VenomBot.Modules
 {
     // for commands to be available, and have the Context passed to them, we must inherit ModuleBase
-    public class Admin : ModuleBase<SocketCommandContext>
+    public class Admin : InteractiveBase<SocketCommandContext>
     {
         static string ModLogsPath = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Modlogs.json";
         static async Task AddModlogs(ulong userID, Action action, ulong ModeratorID, string reason, string username)
@@ -84,6 +84,8 @@ namespace VenomBot.Modules
         public class UserModLogs
         {
             public string Reason { get; set; }
+
+            public string GuildID { get; set; }
             public Action Action { get; set; }
             public ulong ModeratorID { get; set; }
             public string Date { get; set; }
@@ -99,6 +101,7 @@ namespace VenomBot.Modules
         }
 
         [Command("clearlog")]
+        [Summary("Clear's the log number of the specified user")]
         public async Task clearwarn(string user1, int number = 999)
         {
             var user = Context.User as SocketGuildUser;
@@ -230,6 +233,7 @@ namespace VenomBot.Modules
         }
 
         [Command("modlogs")]
+        [Summary("Checks the logs of the specified user.")]
         public async Task Modlogs(string mention)
         {
             var user = Context.User as SocketGuildUser;
@@ -295,7 +299,8 @@ namespace VenomBot.Modules
 
 
         [Command("slowmode")]
-        [RequireUserPermission(GuildPermission.KickMembers)]
+        [Summary("Sets the slowmode of the current channel.")]
+        [RequireUserPermission(GuildPermission.ManageChannels)]
 
         public async Task Slowmode(string value = null)
         {
@@ -335,6 +340,7 @@ namespace VenomBot.Modules
         }
 
         [Command("mute")]
+        [Summary("Mutes the specified user.")]
         [RequireUserPermission(GuildPermission.MuteMembers)]
 
         public async Task Mute(SocketGuildUser user = null, [Remainder] string reason = null)
@@ -404,7 +410,7 @@ namespace VenomBot.Modules
 
 
         [Command("Purge")]
-        [Summary("Removes the specified number of messages.")]
+        [Summary("Clears the amount of messages specified in the current channel.")]
         [RequireBotPermission(GuildPermission.ManageMessages)]
         [RequireUserPermission(GuildPermission.ManageMessages)]
 
@@ -421,7 +427,7 @@ namespace VenomBot.Modules
                 noargs.WithFooter($"{Context.Message.Author.ToString()}");
                 noargs.WithColor(Color.DarkPurple);
 
-                await ReplyAsync("", false, noargs.Build());
+                await ReplyAndDeleteAsync("", false, noargs.Build(), timeout: TimeSpan.FromSeconds(10));
                 return;
             }
 
@@ -437,7 +443,7 @@ namespace VenomBot.Modules
                 belowzero.WithFooter($"{Context.Message.Author.ToString()}");
                 belowzero.WithColor(Color.DarkPurple);
 
-                await ReplyAsync("", false, belowzero.Build());
+                await ReplyAndDeleteAsync("", false, belowzero.Build(), timeout: TimeSpan.FromSeconds(10));
                 return;
             }
 
@@ -455,7 +461,7 @@ namespace VenomBot.Modules
 
             // Check if there are any messages to delete.
             if (count == 0)
-                await ReplyAsync("Nothing to delete.");
+                await ReplyAndDeleteAsync("Nothing to delete.", timeout: TimeSpan.FromSeconds(10));
 
             else
             {
@@ -465,15 +471,15 @@ namespace VenomBot.Modules
                 builder.WithTitle($"Done. Removed {count} {(count > 1 ? "messages" : "message")}.");
                 builder.WithCurrentTimestamp();
 
-                builder.WithColor(Color.Red);
-                await ReplyAsync("", false, builder.Build());
+                builder.WithColor(Color.DarkPurple);
+                await ReplyAndDeleteAsync("", false, builder.Build(), timeout: TimeSpan.FromSeconds(10));
                 await Context.Message.DeleteAsync();
             }
         }
 
 
         [Command("ban")]
-        [Summary("Ban's the specified user")]
+        [Summary("Ban's the specified user.")]
         [RequireBotPermission(GuildPermission.BanMembers)]
         [RequireUserPermission(GuildPermission.BanMembers)]
 
@@ -507,12 +513,13 @@ namespace VenomBot.Modules
 
             EmbedBuilder builder = new EmbedBuilder();
 
-            builder.WithTitle($"User {user.ToString()} was banned.");
+            builder.WithTitle($"User {user.Mention} was banned.");
             builder.WithDescription($"Banned for {reason}.");
             builder.WithFooter($"Banned by {Context.Message.Author.ToString()}");
             builder.WithCurrentTimestamp();
 
             builder.WithColor(Color.Red);
+            await AddModlogs(user.Id, Action.Banned, Context.Message.Author.Id, reason, user.Username);
             await ReplyAsync("", false, builder.Build());
 
             EmbedBuilder builder2 = new EmbedBuilder();
@@ -523,7 +530,6 @@ namespace VenomBot.Modules
             builder2.WithCurrentTimestamp();
 
             await user.SendMessageAsync($"{user.Mention}", false, builder2.Build());
-            await ReplyAsync($"{user.Mention}");
             await Context.Guild.AddBanAsync(user, 7, reason);
         }
 
@@ -571,6 +577,7 @@ namespace VenomBot.Modules
             kicked.WithColor(Color.DarkPurple);
 
             await ReplyAsync("", false, kicked.Build());
+            await AddModlogs(user.Id, Action.Kicked, Context.Message.Author.Id, reason, user.Username);
 
             EmbedBuilder kicked2 = new EmbedBuilder();
 

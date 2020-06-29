@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Addons.Interactive;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -14,7 +15,7 @@ using Discord.WebSocket;
 namespace VenomBot.Modules
 {
     // for commands to be available, and have the Context passed to them, we must inherit ModuleBase
-    public class Commands : ModuleBase<SocketCommandContext>
+    public class Commands : InteractiveBase<SocketCommandContext>
     {
 
         private static readonly Color Purplism = new Color(38, 0, 99);
@@ -23,8 +24,9 @@ namespace VenomBot.Modules
         static int rot = 0;
 
         [Command("lovetest")]
+        [Summary("Measures the amount of love between two people or objects.")]
 
-        public async Task RNG([Remainder] string love)
+        public async Task RNG(string love1, [Remainder] string love)
         {
 
             var rand = new Random();
@@ -32,13 +34,14 @@ namespace VenomBot.Modules
             EmbedBuilder builder = new EmbedBuilder();
 
             builder.WithTitle("Love Test");
-            builder.WithDescription($"How much does {Context.Message.Author.ToString()} love {love.ToString()}");
+            builder.WithDescription($"How much does {love1.ToString()} love {love.ToString()}");
             builder.AddField(rand.Next(101).ToString(), "%");
 
             await ReplyAsync("", false, builder.Build());
         }
 
         [Command("CursedImage")]
+        [Summary("Grabs a cursed image from Reddit.")]
         [RequireNsfw]
 
         public async Task imagesearch()
@@ -73,6 +76,7 @@ namespace VenomBot.Modules
         }
 
         [Command("ping")]
+        [Summary("Checks the ping of the bot.")]
 
         public async Task Ping()
         {
@@ -88,6 +92,7 @@ namespace VenomBot.Modules
 
         [Command("guilds")]
         [Summary("Lists all of the guilds the bot is in.")]
+        [RequireOwner]
 
         public async Task Network()
         {
@@ -114,6 +119,7 @@ namespace VenomBot.Modules
 
 
         [Command("8ball")]
+        [Summary("Ask a question and it shall be answered.")]
         [Alias("ask")]
         [RequireUserPermission(GuildPermission.KickMembers)]
         public async Task AskEightBall([Remainder] string args = null)
@@ -187,6 +193,7 @@ namespace VenomBot.Modules
         }
 
         [Command("politician")]
+        [Summary("Displays a picture of a random politcian.")]
 
         public async Task politician([Remainder] string ignore = null)
         {
@@ -255,6 +262,7 @@ namespace VenomBot.Modules
 
 
         [Command("bork")]
+        [Summary("Show's a picture of a dog barking.")]
         public async Task BorkCommand([Remainder] IUser user = null)
         {
 
@@ -281,14 +289,29 @@ namespace VenomBot.Modules
             await ReplyAsync("", false, builder.Build());
         }
 
-        [Command("authoritarian")]
+        [Command("avatar")]
+        [Alias("av", "ava", "pvp")]
+        [Summary("Gets the avatar of a user.")]
 
-        public async Task Authoritarian()
+        public async Task GetAvatar(IUser user)
         {
-            await ReplyAsync("lol");
+            var avatarUrl = user.GetAvatarUrl();
+
+            var embed = new EmbedBuilder()
+                .WithTitle($"{user.Username}'s avatar")
+                .WithImageUrl(avatarUrl)
+                .WithCurrentTimestamp()
+                .WithColor(Color.DarkPurple)
+                .WithFooter($"{Context.User.Username}")
+                .WithCurrentTimestamp()
+                .Build();
+
+            await ReplyAsync(embed: embed);
+            await Context.Message.DeleteAsync();
         }
 
         [Command("rice")]
+        [Summary("Displays a random picture of rice.")]
         public async Task RiceCommand()
         {
             var sb = new StringBuilder();

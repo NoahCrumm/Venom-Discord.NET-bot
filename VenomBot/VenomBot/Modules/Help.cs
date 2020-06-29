@@ -51,7 +51,9 @@ namespace VenomBot.Modules
             await ReplyAsync("", false, builder.Build());
         }
 
+        
         [Command("help")]
+        [Summary("Shows the help of a certain command.")]
         public async Task HelpAsync(string command)
         {
             var result = _service.Search(Context, command);

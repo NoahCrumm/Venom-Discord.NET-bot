@@ -1,13 +1,17 @@
 ﻿using System;
+using System.IO;
 using Discord;
-using Discord.Net;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
+using Discord.Addons.Interactive;
 using Microsoft.Extensions.DependencyInjection;
 using VenomBot.Services;
+using Lavalink4NET;
+using Lavalink4NET.Logging;
+using Lavalink4NET.MemoryCache;
+using Lavalink4NET.DiscordNet;
 
 namespace VenomBot
 {
@@ -28,6 +32,7 @@ namespace VenomBot
             var _builder = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile(path: "config.json");
+                
 
             // build the configuration and assign to _config          
             _config = _builder.Build();
@@ -41,6 +46,8 @@ namespace VenomBot
                 // get the client and assign to client 
                 // you get the services via GetRequiredService<T>
                 var client = services.GetRequiredService<DiscordSocketClient>();
+                var audio = services.GetRequiredService<IAudioService>();
+                var logger = services.GetRequiredService<ILogger>() as EventLogger;
                 _client = client;
 
                 // setup logging and the ready event
@@ -51,6 +58,7 @@ namespace VenomBot
                 // this is where we get the Token value from the configuration file, and start the bot
                 await client.LoginAsync(TokenType.Bot, _config["Token"]);
                 await client.StartAsync();
+                await audio.InitializeAsync();
 
                 //Set the game name and 
                 string gameName = "Version 1.1.2 <3";
@@ -87,6 +95,16 @@ namespace VenomBot
             // the config we build is also added, which comes in handy for setting the command prefix!
             return new ServiceCollection()
                 .AddSingleton(_config)
+                .AddSingleton<IAudioService, LavalinkNode>()
+                .AddSingleton<IDiscordClientWrapper, DiscordClientWrapper>()
+                .AddSingleton<ILogger, EventLogger>()
+                .AddSingleton(new LavalinkNodeOptions
+                {
+                    RestUri = "http://localhost:2333/",
+                    WebSocketUri = "ws://localhost:2333/",
+                    Password = "youshallnotpass"
+                })
+                .AddSingleton<InteractiveService>()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()

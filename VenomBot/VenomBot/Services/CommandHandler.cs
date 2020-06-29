@@ -6,7 +6,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using System.Net.NetworkInformation;
 
 namespace VenomBot.Services
 {
