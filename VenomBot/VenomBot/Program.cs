@@ -100,8 +100,8 @@ namespace VenomBot
                 .AddSingleton<ILogger, EventLogger>()
                 .AddSingleton(new LavalinkNodeOptions
                 {
-                    RestUri = "http://localhost:2333/",
-                    WebSocketUri = "ws://localhost:2333/",
+                    RestUri = "http://10.0.0.106:2333/",
+                    WebSocketUri = "ws://10.0.0.106:2333/",
                     Password = "youshallnotpass"
                 })
                 .AddSingleton<InteractiveService>()
