@@ -28,7 +28,7 @@ help
 ```
 
 ## Contributing
-You can request to join the development team by contacting VenomC312#0001 on Discord.
+You can request to join the development team by contacting `VenomC312#0001` on Discord.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
