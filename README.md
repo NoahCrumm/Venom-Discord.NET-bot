@@ -13,6 +13,14 @@ Clone the bot somewhere on your computer then open the .csproj file in Visual St
 git clone https://github.com/VenomC312/Venom-Discord.NET-bot
 ```
 
+Now make the config file at the root of the project.
+```Json
+{
+    "Token": "tokenhere",
+    "Prefix": "prefixhere"
+}
+```
+
 ## Usage
 
 ```discord
