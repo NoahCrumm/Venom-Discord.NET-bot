@@ -1,7 +1,7 @@
 # Venom's Discord.Net bot
 
 ![Discord](https://img.shields.io/discord/721487141690933288?logo=Discord&style=for-the-badge)
-![Activity](https://img.shields.io/github/commit-activity/y/VenomC312/Venom-Discord.NET-bot?style=for-the-badge)
+![Last Commit](https://img.shields.io/github/last-commit/VenomC312/Venom-Discord.NET-bot/master?style=for-the-badge)
 
 VenomBot is a DiscordBot written in the [Discord.Net](https://github.com/discord-net/Discord.Net) library wrapper.  The bot was orginially made as a [C#](https://docs.microsoft.com/en-us/dotnet/csharp/) Testing project.
 
