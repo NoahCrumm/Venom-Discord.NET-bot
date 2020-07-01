@@ -24,9 +24,7 @@
     <PackageReference Include="Discord.Net" Version="2.2.0" />
     <PackageReference Include="Discord.Net.Rest" Version="2.2.0" />
     <PackageReference Include="Discord.Net.WebSocket" Version="2.2.0" />
-    <PackageReference Include="EFSecondLevelCache.Core" Version="2.9.1" />
-    <PackageReference Include="Google.Apis" Version="1.46.0" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.46.0.1995" />
+    <PackageReference Include="Gommon" Version="1.2.0" />
     <PackageReference Include="Humanizer" Version="2.8.26" />
     <PackageReference Include="Lavalink4NET.Discord.NET" Version="1.4.20" />
     <PackageReference Include="Lavalink4NET.MemoryCache" Version="1.4.20" />
@@ -44,6 +42,7 @@
     <PackageReference Include="Microsoft.NETCore.App" Version="2.2.8" />
     <PackageReference Include="Nett" Version="0.15.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Qmmands" Version="3.1.2" />
     <PackageReference Include="RestSharp" Version="106.11.4" />
     <PackageReference Include="Sentry.Serilog" Version="2.1.3" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="3.1.0" />

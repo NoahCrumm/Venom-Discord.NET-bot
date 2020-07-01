@@ -18,6 +18,7 @@ namespace VenomBot.Modules
         }
 
         [Command("help")]
+        [Alias("commands")]
         public async Task HelpAsync()
         {
             string prefix = _config["prefix"];
@@ -53,6 +54,7 @@ namespace VenomBot.Modules
 
         
         [Command("help")]
+        [Alias("commands")]
         [Summary("Shows the help of a certain command.")]
         public async Task HelpAsync(string command)
         {
