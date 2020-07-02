@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 namespace VenomBot.Modules
 {
     // for commands to be available, and have the Context passed to them, we must inherit ModuleBase
+
+    [Name("🔨 Moderation")]
     public class Admin : InteractiveBase<SocketCommandContext>
     {
         static string ModLogsPath = $"{Environment.CurrentDirectory}{Path.DirectorySeparatorChar}Data{Path.DirectorySeparatorChar}Modlogs.json";

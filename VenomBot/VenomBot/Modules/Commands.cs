@@ -9,6 +9,9 @@ using Discord.WebSocket;
 
 namespace VenomBot.Modules
 {
+
+    [Name("🤖 Commands")]
+
     // for commands to be available, and have the Context passed to them, we must inherit ModuleBase
     public class Commands : InteractiveBase<SocketCommandContext>
     {

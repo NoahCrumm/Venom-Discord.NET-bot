@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace VenomBot.Modules
 {
 
-    [Name("Owner")]
+    [Name("👑 Owner")]
     [RequireOwner]
 
     public class OwnerOnly : ModuleBase<SocketCommandContext>
@@ -47,6 +47,8 @@ namespace VenomBot.Modules
                 await ReplyAsync("Restart failed!");
             }
         }
+
+
 
     }
 }

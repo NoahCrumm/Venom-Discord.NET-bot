@@ -12,7 +12,7 @@
     /// <summary>
     ///     Presents some of the main features of the Lavalink4NET-Library.
     /// </summary>
-    [Name("Music")]
+    [Name("🎵 Music")]
     [RequireContext(ContextType.Guild)]
     public sealed class MusicModule : ModuleBase<SocketCommandContext>
     {

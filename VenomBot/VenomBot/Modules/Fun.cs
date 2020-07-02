@@ -14,6 +14,9 @@ using Discord.WebSocket;
 
 namespace VenomBot.Modules
 {
+
+    [Name("🤪 Fun")]
+
     public class Fun : InteractiveBase<SocketCommandContext>
     {
 

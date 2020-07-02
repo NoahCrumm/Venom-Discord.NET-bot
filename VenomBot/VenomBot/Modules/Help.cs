@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace VenomBot.Modules
 {
+
+    [Name("🙋 Help")]
+
     public class HelpModule : ModuleBase<SocketCommandContext>
     {
         private readonly CommandService _service;
@@ -43,8 +46,8 @@ namespace VenomBot.Modules
                     builder.AddField(x =>
                     {
                         x.Name = module.Name;
-                        x.Value = description;
-                        x.IsInline = false;
+                        x.Value = "```" + description + "```";
+                        x.IsInline = true;
                     });
                 }
             }
