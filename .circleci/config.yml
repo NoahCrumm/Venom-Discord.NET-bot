@@ -9,4 +9,5 @@
     
      steps:
        - checkout
+       - cd VenomBot
        - run: dotnet build
