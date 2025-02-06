@@ -32,7 +32,8 @@ namespace VenomBot
             var _builder = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile(path: "config.json");
-                
+
+// tax this dick
 
             // build the configuration and assign to _config          
             _config = _builder.Build();
